@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+
+enum Role {
+  ADMIN
+  DEVELOPER
+  COMPANY
+}
+
+enum JobStatus{
+  DRAFT 
+  PENDING_REVIEW
+  PUBLISHED
+  CLOSED
+}
+
+enum ApplicationStatus{
+  PENDING 
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+model User {
+    id            String         @id @default(uuid())
+    email         String         @unique
+    password      String
+    name          String
+    role          Role           @default(DEVELOPER)
+    company       Company?       // A user might own a company
+    links         Link[]
+    applications  Application[]
+    notifications Notification[]
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+}
+
+model Company{
+  id              String          @id @default(uuid())
+  name            String
+  description     String?
+  website         String? 
+  verified        Boolean         @default(false)
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id])
+  jobs            Job[] 
+}
+
+model Job{
+   id           String        @id @default(uuid())
+   title        String
+   description  String
+   salaryMin    Int?
+   salaryMax    Int?
+   location     String
+   isRemote     Boolean       @default(false)
+   skills       String[]
+   status       JobStatus     @default(DRAFT)
+   companyId    String
+   company      Company       @relation(fields: [companyId], references: [id])
+   applications Application[]
+   createdAt    DateTime      @default(now())
+}
+
+model Application{
+    id          String            @id @default(uuid())
+    resumeUrl   String            // This will be the S3 link
+    coverLetter String?
+    status      ApplicationStatus @default(PENDING)
+    jobId       String
+    job         Job               @relation(fields: [jobId], references: [id])
+    userId      String
+    user        User              @relation(fields: [userId], references: [id])
+    appliedAt   DateTime          @default(now())
+}
+
+model Notification{
+    id        String   @id @default(uuid())
+    message   String
+    isRead    Boolean  @default(false)
+    userId    String
+    user      User     @relation(fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+}
+model Link{
+    id        String    @id @default(uuid())
+    platform  String
+    url       String
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt   
+    userId    String
+    user      User      @relation(fields: [userId], references: [id])
+}
