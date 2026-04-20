@@ -56,7 +56,7 @@ static async getLinksbyId(userId: string){
             id: userId
         },
         include:{
-            
+            password: false,
             links : true
         }
     })
