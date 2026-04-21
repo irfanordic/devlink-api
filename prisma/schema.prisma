@@ -40,10 +40,21 @@ model User {
   role          Role           @default(DEVELOPER)
   company       Company? // A user might own a company
   links         Link[]
+  profile       Profile?
   applications  Application[]
   notifications Notification[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+}
+
+
+model Profile {
+  id        String   @id @default(uuid())
+  bio       String?
+  title     String?  // e.g., "Fullstack Developer"
+  skills    String[] // Array of strings for speed
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Company {
