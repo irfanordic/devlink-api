@@ -1,5 +1,5 @@
 import {prisma } from "../config/prisma.js";
-import { Job } from "../generated/prisma/index.js";
+import { Job, JobStatus } from "../generated/prisma/index.js";
 export class JobService{
     static async createJob(data: any, userId: string){
       
@@ -40,11 +40,35 @@ export class JobService{
 
 
 
-    static async getJobs(){
+    static async getJobs(query: any){
+
+        const {search, location, salary} = query
+
+      const where:any={
+        JobStatus: "PUBLISHED"
+      }
+
+    if(search){
+        where.OR = [
+            
+           {title:{ contains: search , mode: "insensitive"}} ,
+            {description:{ contains: search, mode: "insensitive"}}
+        ]
+        
+    }
+
+    if(location){
+        where.location =  {contains: location, mode: 'insensitive'}
+    }
+
+    if(salary){
+        where.salary = {gte: Number(salary)}
+    }
+
+
+
         const jobs  = await prisma.job.findMany({
-            where:{
-                jobStatus: "PUBLISHED"
-            },
+            where,
             include:{
                 company:{
                     select:{
