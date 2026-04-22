@@ -24,5 +24,10 @@ router.get('/job/:id',
   authorizeRoles(['COMPANY']), 
   ApplicationController.getApplicants
 );
+router.patch('/:id/status', 
+    authMiddleware, 
+    authorizeRoles(['COMPANY']), 
+    ApplicationController.updateStatus
+);
 
 export default router

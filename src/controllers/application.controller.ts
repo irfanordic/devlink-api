@@ -1,5 +1,6 @@
 import { Request, Response} from 'express'
 import { ApplicationService } from '../services/application.service.js'
+import { ApplicationStatus } from '../generated/prisma/index.js'
 
 export class ApplicationController{
     static async apply(req: Request, res: Response){
@@ -58,5 +59,24 @@ static async myApplications(req: Request, res: Response){
             }
 }
 
+
+static async updateStatus(req: Request, res: Response){
+    const applicationId = req.params.id as string
+    const userId = (req as any).user.id
+    const status = req.body.status as ApplicationStatus
+
+    try{
+        const updatedStatus = await ApplicationService.updateStatus(applicationId, status, userId)
+              res.status(200).json({
+                            status: "success",
+                            message: "status has been changed successfully ",
+                            data: updatedStatus
+                        })
+    } catch(error){
+                    res.status(400).json({
+                        message : (error as any).message
+                    })
+                }
+}
 
 }

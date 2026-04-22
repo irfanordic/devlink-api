@@ -1,4 +1,5 @@
 import {prisma } from "../config/prisma.js";
+import { ApplicationStatus } from "../generated/prisma/edge.js";
 
 
 export class ApplicationService{
@@ -73,5 +74,23 @@ export class ApplicationService{
                 }
             }
         })
+    }
+
+    static async updateStatus(applicationId: string, status: ApplicationStatus, userId: string){
+        const updateCount = await prisma.application.updateMany({
+            where:{
+                id: applicationId,
+                job:{
+                    company:{userId}
+                }
+            },
+            data:{
+                status: status
+            }
+        })
+        if(updateCount.count === 0){
+            throw new Error("application not found or you are not authorized to update the status")
+        }
+        return updateCount
     }
 }

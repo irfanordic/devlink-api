@@ -46,8 +46,11 @@ export class JobController{
     }
 
     static async getJobs(req: Request, res: Response){
+
+        const query = req.query
+
         try{
-            const jobs = await JobService.getJobs()
+            const jobs = await JobService.getJobs(query )
             res.status(200).json({
                 status: "success",
                 message: "jobs retreived succesfully",
