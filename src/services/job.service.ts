@@ -44,6 +44,10 @@ export class JobService{
 
         const {search, location, salary} = query
 
+         const page = Number(query.page) || 1
+         const limit = Number(query.limit) || 10
+         const skip = (page - 1 ) * limit
+
       const where:any={
         JobStatus: "PUBLISHED"
       }
@@ -67,8 +71,11 @@ export class JobService{
 
 
 
-        const jobs  = await prisma.job.findMany({
-            where,
+        const [jobs, jobCount]  = await prisma.$transaction([
+           prisma.job.findMany({
+             where,
+             skip,
+             take: limit,
             include:{
                 company:{
                     select:{
@@ -78,8 +85,23 @@ export class JobService{
                     }
                 }
             }
-        })
-        return jobs
+           }),
+           prisma.job.count({where}) 
+        ])
+
+       const totalPages = Math.ceil(jobCount / limit)
+
+
+        return { 
+            data: jobs,
+            meta:{
+                total: jobCount,
+                page,
+                totalPages,
+                limit
+            }
+            
+        }
     }
 
   static async updateJobs(data: any, jobId: string, userId: string){
