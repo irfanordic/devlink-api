@@ -2,7 +2,8 @@ import {Router} from 'express'
 import { ApplicationController } from '../controllers/application.controller.js'
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { authorizeRoles } from '../middleware/role.middleware.js';
-
+import { validate } from '../middleware/validate.middleware.js';
+import { applicationSchema , updateApplicationStatusSchema} from '../validators/application.validator.js';
 
 const router = Router()
 
@@ -10,6 +11,7 @@ const router = Router()
 router.post('/:id/apply', 
   authMiddleware, 
   authorizeRoles(['DEVELOPER']), 
+  validate(applicationSchema),
   ApplicationController.apply
 );
 
@@ -27,6 +29,7 @@ router.get('/job/:id',
 router.patch('/:id/status', 
     authMiddleware, 
     authorizeRoles(['COMPANY']), 
+    validate(updateApplicationStatusSchema),
     ApplicationController.updateStatus
 );
 
